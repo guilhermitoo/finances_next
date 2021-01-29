@@ -1,65 +1,62 @@
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+import Head from 'next/head';
+import {useEffect,useState} from 'react';
+import api from '../lib/db.js';
 
 export default function Home() {
+  const mes = 'Janeiro';
+  const [contas,SetContas] = useState([]);
+
+  useEffect(() => {
+    loadContas();
+  },[]);
+
+  async function loadContas() {
+    let dt = new Date();
+    dt = new Date(dt.getFullYear(),dt.getMonth()+1,0);
+
+    let first_day = new Date(dt.getFullYear(),dt.getMonth(),1,0,0,0);
+    let last_day = new Date(dt.getFullYear(),dt.getMonth(),dt.getDate(),23,59,59);
+    
+    console.log({first_day,last_day});
+
+    await api.get('/contas.json',{}).then(response => {
+        let res = response.data.filter((obj) => { 
+          return ((new Date(obj.data) >= first_day) && (new Date(obj.data) <= last_day)); 
+        });
+        console.log(res);
+        SetContas(res);
+    });    
+  }
+
   return (
-    <div className={styles.container}>
+    <div class="bg-gray-100">
       <Head>
-        <title>Create Next App</title>
+        <title>Finances</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
+      <main class="flex flex-col mx-auto px-4 md:w-1/2 h-screen">
+        <h1 class="mx-auto font-bold text-xl my-4">Contas do mês de {mes}</h1>
+        <div class="overflow-auto">
+          <div class="mx-auto w-full h-8 bg-gray-300 rounded-xl mb-2 flex flex-row font-semibold">
+            <h1 class="mx-2 my-auto w-2/6">Descrição</h1>
+            <h1 class="mx-2 my-auto w-1/6">Dia Venc.</h1>
+            <h1 class="mx-2 my-auto w-1/6">Parcela</h1>
+            <h1 class="mx-2 my-auto w-1/6 flex flex-row-reverse">Valor</h1>
+          </div>
+          {contas.map(ct => (
+            <div class="mx-auto w-full h-12 bg-red-700 rounded-xl mb-2 flex flex-row text-white font-semibold">
+              <h1 class="mx-2 my-auto w-2/6">{ct.descricao}</h1>
+              <h1 class="mx-2 my-auto w-1/6">{ct.dia}</h1>
+              <h1 class="mx-2 my-auto w-1/6">{ct.parcela}</h1>
+              <h1 class="mx-2 my-auto w-1/6 flex flex-row-reverse">{Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(ct.valor)}</h1>
+            </div>  
+          ))}
         </div>
       </main>
 
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
+      <footer>
       </footer>
-    </div>
+    </div>    
   )
 }
