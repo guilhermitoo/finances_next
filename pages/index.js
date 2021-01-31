@@ -1,6 +1,10 @@
 import Head from 'next/head';
 import {useEffect,useState} from 'react';
-import api from '../lib/db.js';
+import axios from 'axios';
+
+const apiLocal = axios.create({
+  baseURL: 'http://localhost:3000/api/',
+});
 
 export default function Home() {
   const mes = 'Janeiro';
@@ -19,7 +23,7 @@ export default function Home() {
     
     console.log({first_day,last_day});
 
-    await api.get('/contas.json',{}).then(response => {
+    await apiLocal.get('/bills',{}).then(response => {
         let res = response.data.filter((obj) => { 
           return ((new Date(obj.data) >= first_day) && (new Date(obj.data) <= last_day)); 
         });
