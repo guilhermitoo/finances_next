@@ -3,7 +3,7 @@ import {useEffect,useState} from 'react';
 import axios from 'axios';
 
 const apiLocal = axios.create({
-  baseURL: 'https://finances-next.vercel.app/api/',
+  baseURL: '',
 });
 
 export default function Home() {
@@ -23,7 +23,7 @@ export default function Home() {
     
     console.log({first_day,last_day});
 
-    await apiLocal.get('/bills',{}).then(response => {
+    await apiLocal.get('/api/bills',{}).then(response => {
         let res = response.data.filter((obj) => { 
           return ((new Date(obj.data) >= first_day) && (new Date(obj.data) <= last_day)); 
         });
