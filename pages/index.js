@@ -49,7 +49,7 @@ export default function Home() {
             <h1 class="mx-2 my-auto w-1/6 flex flex-row-reverse">Valor</h1>
           </div>
           {contas.map(ct => (
-            <div class="mx-auto w-full h-12 bg-red-700 rounded-xl mb-2 flex flex-row text-white font-semibold">
+            <div class="mx-auto w-full h-12 rounded-xl mb-2 flex flex-row text-white font-semibold bg-red-500">
               <h1 class="mx-2 my-auto w-2/6">{ct.descricao}</h1>
               <h1 class="mx-2 my-auto w-1/6">{ct.dia}</h1>
               <h1 class="mx-2 my-auto w-1/6">{ct.parcela}</h1>
