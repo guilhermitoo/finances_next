@@ -3,7 +3,7 @@ import {useEffect,useState} from 'react';
 import axios from 'axios';
 
 const apiLocal = axios.create({
-  baseURL: 'http://localhost:3000/api/',
+  baseURL: 'https://finances-next.vercel.app/api/',
 });
 
 export default function Home() {
