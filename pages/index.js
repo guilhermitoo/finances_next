@@ -2,29 +2,34 @@ import Head from 'next/head';
 import {useEffect,useState} from 'react';
 import axios from 'axios';
 import {FaCheckCircle} from 'react-icons/fa';
+import {getNextMonth,getMonthName} from '../global.js';
 
 const apiLocal = axios.create();
 
 export default function Home() {
-  const mes = 'Janeiro';
-  const ano = '2021';
+  const [_data,Set_Data] = useState();
+  const [mes,SetMes] = useState();
+  const [ano,SetAno] = useState();
   const [contas,SetContas] = useState([]);
   const [list,SetList] = useState();
 
   useEffect(() => {
-    loadContas();
+    loadContas(new Date());
   },[]);
 
   useEffect(() => {
     loadList();
   },[contas]);
 
-  async function loadContas() {
-    let dt = new Date();
+  async function loadContas(dt) {
+    Set_Data(dt);
     dt = new Date(dt.getFullYear(),dt.getMonth()+1,0);
 
     let first_day = new Date(dt.getFullYear(),dt.getMonth(),1,0,0,0);
     let last_day = new Date(dt.getFullYear(),dt.getMonth(),dt.getDate(),23,59,59);
+
+    SetMes(getMonthName(first_day.getMonth()));
+    SetAno(first_day.getFullYear());
 
     await apiLocal.get('/api/bills',{}).then(response => {
         let res = response.data.filter((obj) => { 
@@ -68,6 +73,17 @@ export default function Home() {
     )
   }
 
+  async function NextMonth() {
+    let dt = await getNextMonth(_data,1);
+    loadContas(dt);
+  }
+
+  async function PreviousMonth() {
+    let dt = await getNextMonth(_data,-1);
+    console.log(dt);
+    loadContas(dt);
+  }
+
   return (
     <div class="bg-gray-100">
       <Head>
@@ -76,7 +92,15 @@ export default function Home() {
       </Head>
 
       <main class="flex flex-col mx-auto px-4 md:w-1/2 h-screen text-sm">
-        <h1 class="mx-auto font-bold text-xl my-4">Contas do mês de {mes} de {ano}</h1>
+        <div class="w-full flex flex-row">
+          <button class="bg-gray-600 my-2 px-4 font-semibold text-white shadow-lg appearence-none focus:outline-none hover:bg-gray-800 rounded-xl"
+              onClick={PreviousMonth}>Anterior</button>
+          <div class="mx-auto">
+            <h1 class="mx-auto font-bold text-xl my-4">{mes} de {ano}</h1>
+          </div>
+          <button class="bg-gray-600 my-2 px-4 font-semibold text-white shadow-lg appearence-none focus:outline-none hover:bg-gray-800 rounded-xl" 
+              onClick={NextMonth}>Próximo</button>
+        </div>
         <div class='overflow-auto'>
           <div class="mx-auto w-full h-8 bg-gray-300 rounded-xl mb-2 flex flex-row font-semibold">
             <h1 class="mx-2 my-auto w-4/12">Descrição</h1>
