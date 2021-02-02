@@ -7,6 +7,7 @@ import {getNextMonth,getMonthName} from '../global.js';
 const apiLocal = axios.create();
 
 export default function Home() {
+  const [fbData,SetFbData] = useState([]);
   const [_data,Set_Data] = useState();
   const [mes,SetMes] = useState();
   const [ano,SetAno] = useState();
@@ -14,12 +15,22 @@ export default function Home() {
   const [list,SetList] = useState();
 
   useEffect(() => {
-    loadContas(new Date());
+    loadFbData();
   },[]);
+
+  useEffect(() => {
+    loadContas(new Date());
+  },[fbData]);
 
   useEffect(() => {
     loadList();
   },[contas]);
+
+  async function loadFbData() {
+    await apiLocal.get('/api/bills',{}).then(response => {      
+      SetFbData(response.data);
+    });     
+  }
 
   async function loadContas(dt) {
     Set_Data(dt);
@@ -31,12 +42,17 @@ export default function Home() {
     SetMes(getMonthName(first_day.getMonth()));
     SetAno(first_day.getFullYear());
 
-    await apiLocal.get('/api/bills',{}).then(response => {
-        let res = response.data.filter((obj) => { 
-          return ((new Date(obj.data) >= first_day) && (new Date(obj.data) <= last_day)); 
-        });
-        SetContas(res);
-    });    
+    let res = fbData.filter((obj) => { 
+      return ((new Date(obj.data) >= first_day) && (new Date(obj.data) <= last_day)); 
+    });
+      
+    SetContas(res);
+    // await apiLocal.get('/api/bills',{}).then(response => {
+    //     let res = response.data.filter((obj) => { 
+    //       return ((new Date(obj.data) >= first_day) && (new Date(obj.data) <= last_day)); 
+    //     });
+    //     SetContas(res);
+    // });    
   }
 
   function getItemClass(valor) {
@@ -65,9 +81,9 @@ export default function Home() {
           <h1 class="mx-2 my-auto w-4/12">{ct.descricao}</h1>
           <h1 class="mx-2 my-auto w-1/12">{ct.dia}</h1>
           <h1 class="mx-2 my-auto w-2/12">{ct.parcela}</h1>
-          <h1 class="mx-2 my-auto w-3/12 flex flex-row-reverse">{Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(ct.valor)}</h1>
-          <h1 class="mx-2 my-auto w-2/12 flex flex-row-reverse">{ct.data_pagamento ? <FaCheckCircle size={24} class="mx-2 " /> :
-                 <button class="appearence-none shadow-lg rounded p-1 bg-gray-700" onClick={() => handlePayment(ct)}>Pagar</button>}</h1>
+          <h1 class="mx-2 my-auto w-4/12 flex flex-row-reverse">{Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(ct.valor)}</h1>
+          <h1 class="mx-2 my-auto w-1/12 flex flex-row-reverse">{ct.data_pagamento ? <FaCheckCircle size={24} class="mx-1" /> :
+                 <button class="appearence-none shadow-lg rounded-lg bg-gray-700 px-1 py-2" onClick={() => handlePayment(ct)}>Pagar</button>}</h1>
         </div>  
       ))
     )
@@ -80,18 +96,17 @@ export default function Home() {
 
   async function PreviousMonth() {
     let dt = await getNextMonth(_data,-1);
-    console.log(dt);
     loadContas(dt);
   }
 
   return (
-    <div class="bg-gray-100">
+    <div class="bg-gray-100 text-xs md:text-sm lg:text-base">
       <Head>
         <title>Finances</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main class="flex flex-col mx-auto px-4 md:w-1/2 h-screen text-sm">
+      <main class="flex flex-col mx-auto px-4 md:w-1/2 h-screen">
         <div class="w-full flex flex-row">
           <button class="bg-gray-600 my-2 px-4 font-semibold text-white shadow-lg appearence-none focus:outline-none hover:bg-gray-800 rounded-xl"
               onClick={PreviousMonth}>Anterior</button>
@@ -106,8 +121,8 @@ export default function Home() {
             <h1 class="mx-2 my-auto w-4/12">Descrição</h1>
             <h1 class="mx-2 my-auto w-1/12">Dia</h1>
             <h1 class="mx-2 my-auto w-2/12">Parcela</h1>
-            <h1 class="mx-2 my-auto w-3/12 flex flex-row-reverse">Valor</h1>
-            <h1 class="mx-2 my-auto w-2/12 flex flex-row-reverse"></h1>
+            <h1 class="mx-2 my-auto w-4/12 flex flex-row-reverse">Valor</h1>
+            <h1 class="mx-2 my-auto w-1/12 flex flex-row-reverse"></h1>
           </div>
           {list}
         </div>
