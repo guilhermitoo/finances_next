@@ -8,7 +8,10 @@ export default async (req, res) => {
         await api.get('/contas.json',{}).then(response => {
             response.data.sort(function(a,b) {
                 return b.valor - a.valor;
-            })
+            });
+            response.data.forEach((currentValue,index,arr) => {
+                currentValue.id = index+1;
+            });
             res.json(response.data);
         });
     } else if ( (req.method === 'POST') ) {
