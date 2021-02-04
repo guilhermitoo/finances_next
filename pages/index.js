@@ -73,21 +73,32 @@ export default function Home() {
     conta.data_pagamento = new Date().toJSON();
     loadList();
   }
+  
+  function handleBancoChange(e,ct)  {
+    ct.conta_pagamento = bancos[e.target.selectedIndex];
+    loadList();
+  }
 
-  function getBancoSelect() {
-    return  <select class="w-2/3 appearence-none focus:outline-none p-2 m-2 border-gray-1 border-1 rounded shadow">
-              {bancos.map(bc => (
-                <option>{bc}</option>
-              ))} 
-              
-            </select>
+  function handleValorChange(e,ct) {
+    ct.valor = e.target.value;
+    loadList();
   }
 
   function handleDataPChange(e,ct) {
     //  ESTA ALTERANDO DIRETAMENTE O ARRAY. O CORRETO É ALTERAR UMA VARIÁVEL DE CONTROLE E
     //  DEIXAR PARA O CONFIRMAR SALVAR NO ARRAY E MANDAR PRO BANCO
-    // ct.data_pagamento = e.target.value;
-    // loadList();
+    ct.data_pagamento = e.target.value;
+    loadList();
+  }
+
+  function getBancoSelect(ct) {
+    return  <select class="w-2/3 appearence-none focus:outline-none p-2 m-2 border-gray-1 border-1 rounded shadow"
+              onChange={e => handleBancoChange(e,ct)}>
+              {bancos.map(bc => (
+                <option key={bc}>{bc}</option>
+              ))} 
+              
+            </select>
   }
 
   function loadList() {
@@ -115,13 +126,13 @@ export default function Home() {
                   <text class="font-semibold">Valor</text>
                 </div>
                 <input type="number" class="w-2/3 appearence-none focus:outline-none p-2 m-2 border-gray-1 border-1 rounded shadow"
-                  value={ct.valor}></input>
+                  value={ct.valor} onChange={e => handleValorChange(e,ct)}></input>
               </div>              
               <div class="w-full flex flex-row">
                 <div class="w-1/3 my-auto">
                   <text class="font-semibold">Conta</text>
                 </div>
-                {getBancoSelect()}
+                {getBancoSelect(ct)}
               </div>
               <div class="flex flex-row-reverse">
                 <button class="appearence-none focus:outline-none my-2 mr-2 bg-blue-500 hover:bg-blue-700 p-2 rounded-lg font-semibold text-white"
