@@ -8,7 +8,7 @@ const apiLocal = axios.create();
 
 export default function Home() {
   const [fbData,SetFbData] = useState([]);
-  const [_data,Set_Data] = useState();
+  const [_data,Set_Data] = useState(new Date());
   const [mes,SetMes] = useState();
   const [ano,SetAno] = useState();
   const [contas,SetContas] = useState([]);
@@ -17,40 +17,49 @@ export default function Home() {
   ]);
   const [list,SetList] = useState();
 
-  useEffect(() => {
-    loadFbData();
-  },[]);
+  const [cad_descricao,SetCad_Descricao] = useState('');
+  const [cad_dia,SetCad_Dia] = useState(10);
+  const [cad_parcela,SetCad_Parcela] = useState();
+  const [cad_valor,SetCad_Valor] = useState(0.00);
 
   useEffect(() => {
-    loadContas(new Date('2021-01-01 00:00:00'));
-  },[fbData]);
+    loadContas(_data);
+  },[]);
+
+  // useEffect(() => {
+  //   loadContas(new Date('2021-01-02 00:00:00'));
+  // },[fbData]);
 
   useEffect(() => {
     loadList();
   },[contas]);
 
-  async function loadFbData() {
-    await apiLocal.get('/api/bills',{}).then(response => {      
-      SetFbData(response.data);
+  async function loadContas(dt) {
+    let dat = String(dt.getMonth()+1) + dt.getFullYear();
+    Set_Data(dt);
+    SetMes(getMonthName(dt.getMonth()));
+    SetAno(dt.getFullYear());
+    await apiLocal.get(`/api/bills?month=${dat}`,{}).then(response => {      
+      SetContas(response.data);
     });     
   }
 
-  async function loadContas(dt) {
-    Set_Data(dt);
-    dt = new Date(dt.getFullYear(),dt.getMonth()+1,0);
+  // async function loadContas(dt) {
+  //   Set_Data(dt);
+  //   dt = new Date(dt.getFullYear(),dt.getMonth()+1,0);
 
-    let first_day = new Date(dt.getFullYear(),dt.getMonth(),1,0,0,0);
-    let last_day = new Date(dt.getFullYear(),dt.getMonth(),dt.getDate(),23,59,59);
+  //   let first_day = new Date(dt.getFullYear(),dt.getMonth(),1,0,0,0);
+  //   let last_day = new Date(dt.getFullYear(),dt.getMonth(),dt.getDate(),23,59,59);
 
-    SetMes(getMonthName(first_day.getMonth()));
-    SetAno(first_day.getFullYear());
+  //   SetMes(getMonthName(first_day.getMonth()));
+  //   SetAno(first_day.getFullYear());
 
-    let res = fbData.filter((obj) => { 
-      return ((new Date(obj.data) >= first_day) && (new Date(obj.data) <= last_day)); 
-    });
-      
-    SetContas(res);
-  }
+  //   let res = fbData.filter((obj) => { 
+  //     return ((new Date(obj.data) >= first_day) && (new Date(obj.data) <= last_day)); 
+  //   });
+
+  //   SetContas(res);
+  // }
 
   function getItemClass(valor) {
     let c = 'mx-auto w-full h-12 rounded-xl flex flex-row text-white font-semibold cursor-pointer';
@@ -69,9 +78,25 @@ export default function Home() {
     document.querySelector(`#box${conta.id}`).classList.toggle("hidden");
   }
 
-  function handleEdit(conta) {
-    conta.data_pagamento = new Date().toJSON();
-    loadList();
+  async function handleEdit(conta) {
+    //conta.data_pagamento = new Date().toJSON();
+    let dat = String(_data.getMonth()+1) + _data.getFullYear();
+    await apiLocal.patch(`/api/bills?month=${dat}`,contas).then(response => {
+      loadList();
+    });
+  }
+
+  async function handleInsert() {
+    let dat = String(_data.getMonth()+1) + _data.getFullYear();
+    await apiLocal.post(`/api/bills?month=${dat}`,{
+      descricao:cad_descricao,
+      dia:cad_dia,
+      parcela:cad_parcela,
+      valor:cad_valor,
+      data:new Date().toJSON()
+    }).then(response => {
+      loadContas(_data);
+    });
   }
   
   function handleBancoChange(e,ct)  {
@@ -179,6 +204,45 @@ export default function Home() {
             <div class="mx-2 my-auto w-2/12">Parcela</div>
             <div class="mx-2 my-auto w-4/12 flex flex-row-reverse">Valor</div>
             <div class="mx-2 my-auto w-1/12 flex flex-row-reverse"></div>
+          </div>
+          <button class="appearence-none focus:outline-none p-1 mb-2 bg-gray-300 rounded-xl text-lg font-semibold" 
+            onClick={() => {document.querySelector('#nova_conta').classList.toggle("hidden");}}>Nova Conta</button>
+          <div class="mb-1 hidden" id="nova_conta">
+            <div class="bg-gray-100 shadow rounded mx-4 px-2 flex flex-col">
+              <div class="w-full flex flex-row">
+                <div class="w-1/3 my-auto">
+                  <text class="font-semibold">Descrição</text>
+                </div>
+                <input type="text" class="w-2/3 appearence-none focus:outline-none p-2 m-2 border-gray-1 border-1 rounded shadow"
+                  data={cad_descricao} onChange={e => SetCad_Descricao(e.target.value)}></input>
+              </div>
+              <div class="w-full flex flex-row">
+                <div class="w-1/3 my-auto">
+                  <text class="font-semibold">Dia Venc.</text>
+                </div>
+                <input type="number" class="w-2/3 appearence-none focus:outline-none p-2 m-2 border-gray-1 border-1 rounded shadow"
+                  data={cad_dia} onChange={e => SetCad_Dia(e.target.value)}></input>
+              </div>
+              <div class="w-full flex flex-row">
+                <div class="w-1/3 my-auto">
+                  <text class="font-semibold">Parcela</text>
+                </div>
+                <input type="text" class="w-2/3 appearence-none focus:outline-none p-2 m-2 border-gray-1 border-1 rounded shadow"
+                  data={cad_parcela} onChange={e => SetCad_Parcela(e.target.value)}></input>
+              </div>
+              <div class="w-full flex flex-row">
+                <div class="w-1/3 my-auto">
+                  <text class="font-semibold">Valor</text>
+                </div>
+                <input type="number" class="w-2/3 appearence-none focus:outline-none p-2 m-2 border-gray-1 border-1 rounded shadow"
+                  data={cad_valor} onChange={e => SetCad_Valor(e.target.value)}></input>
+              </div>              
+              <div class="flex flex-row-reverse">
+                <button class="appearence-none focus:outline-none my-2 mr-2 bg-blue-500 hover:bg-blue-700 p-2 rounded-lg font-semibold text-white"
+                  onClick={handleInsert}>
+                  Cadastrar Conta</button>
+              </div>
+            </div>            
           </div>
           <div class="overflow-auto">
             {list}
