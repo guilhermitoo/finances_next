@@ -36,6 +36,7 @@ export default async (req, res) => {
         });
     } else if ( (req.method === 'PATCH') ) {
         let id = req.body.id;
+        console.log(req.body);
         await api.patch(`/contas/${month}/${id}.json`,req.body).then(response => {
             res.statusCode = response.statusCode;
             res.body = response.data;

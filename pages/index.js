@@ -81,8 +81,9 @@ export default function Home() {
   async function handleEdit(conta) {
     //conta.data_pagamento = new Date().toJSON();
     let dat = String(_data.getMonth()+1) + _data.getFullYear();
-    await apiLocal.patch(`/api/bills?month=${dat}`,contas).then(response => {
-      loadList();
+    await apiLocal.patch(`/api/bills?month=${dat}`,conta).then(response => {
+      loadContas(_data);
+      showPanel(conta); // VERIFICAR, N TA FUNFANDO
     });
   }
 
