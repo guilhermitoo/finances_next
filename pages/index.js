@@ -26,10 +26,6 @@ export default function Home() {
     loadContas(_data);
   },[]);
 
-  // useEffect(() => {
-  //   loadContas(new Date('2021-01-02 00:00:00'));
-  // },[fbData]);
-
   useEffect(() => {
     loadList();
   },[contas]);
@@ -82,8 +78,8 @@ export default function Home() {
     //conta.data_pagamento = new Date().toJSON();
     let dat = String(_data.getMonth()+1) + _data.getFullYear();
     await apiLocal.patch(`/api/bills?month=${dat}`,conta).then(response => {
-      loadContas(_data);
-      showPanel(conta); // VERIFICAR, N TA FUNFANDO
+      showPanel(conta);
+      loadContas(_data);      
     });
   }
 
@@ -96,7 +92,10 @@ export default function Home() {
       valor:cad_valor,
       data:new Date().toJSON()
     }).then(response => {
-      loadContas(_data);
+      document.querySelector('#nova_conta').classList.add("hidden");
+      setTimeout(() => {
+        loadContas(_data);        
+      },1000);      
     });
   }
   

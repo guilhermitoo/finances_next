@@ -18,28 +18,20 @@ export default async (req, res) => {
                 });
                 rsp.sort(function(a,b) {
                     return b.valor - a.valor;
-                });
-                // rsp.forEach((currentValue,index,arr) => {
-                //     currentValue.id = index+1;
-                // });
+                });                
                 res.json(rsp);     
-                // res.json(response.data);
-                //AJEITAR PARA CADASTRAR COM POST E EDITAR COM PATCH UTILIZANDO A CHAVE GERADA
             } else {
                 res.json([]);
             }
         });
     } else if ( (req.method === 'POST') ) {
         await api.post(`/contas/${month}.json`,req.body).then(response => {
-            res.statusCode = response.statusCode;
-            res.body = response.data;
+            res.status(response.status).json(response.data);
         });
     } else if ( (req.method === 'PATCH') ) {
         let id = req.body.id;
-        console.log(req.body);
         await api.patch(`/contas/${month}/${id}.json`,req.body).then(response => {
-            res.statusCode = response.statusCode;
-            res.body = response.data;
+            res.status(response.status).json(response.data);
         });
     }
   }
