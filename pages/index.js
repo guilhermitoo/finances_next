@@ -21,6 +21,8 @@ export default function Home() {
   const [cad_dia,SetCad_Dia] = useState(10);
   const [cad_parcela,SetCad_Parcela] = useState();
   const [cad_valor,SetCad_Valor] = useState(0.00);
+  const [valorTotal,SetValorTotal] = useState(0);
+  const [emAberto,SetEmAberto] = useState(0);
 
   useEffect(() => {
     loadContas(_data);
@@ -28,6 +30,17 @@ export default function Home() {
 
   useEffect(() => {
     loadList();
+    if (contas.length > 0) {
+      SetValorTotal(contas.reduce(function(acc, val) { return parseFloat(acc) + parseFloat(val.valor); }, 0));
+      SetEmAberto(contas.reduce(function(acc, val) 
+        { 
+          if (!val.data_pagamento) {
+            return acc += 1;
+          } else {
+            return acc;
+          }          
+        }, 0));
+    }
   },[contas]);
 
   async function loadContas(dt) {
@@ -57,8 +70,7 @@ export default function Home() {
   //   SetContas(res);
   // }
 
-  function getItemClass(valor) {
-    let c = 'mx-auto w-full h-12 rounded-xl flex flex-row text-white font-semibold cursor-pointer';
+  function getItemClass(c,valor) {
     if (isAboveZero(valor)) {
       return c + ' bg-green-500'
     } else {
@@ -78,6 +90,17 @@ export default function Home() {
     //conta.data_pagamento = new Date().toJSON();
     let dat = String(_data.getMonth()+1) + _data.getFullYear();
     await apiLocal.patch(`/api/bills?month=${dat}`,conta).then(response => {
+      showPanel(conta);
+      loadContas(_data);      
+    });
+  }
+
+  async function handleDelete(conta) {
+    if (!confirm('Confirma exclusão da conta?')) {
+      return
+    }
+    let dat = String(_data.getMonth()+1) + _data.getFullYear();
+    await apiLocal.delete(`/api/bills?month=${dat}&id=${conta.id}`).then(response => {
       showPanel(conta);
       loadContas(_data);      
     });
@@ -130,9 +153,9 @@ export default function Home() {
     SetList(
       contas.map(ct => (
         <div>
-          <div key={ct.id} class={getItemClass(ct.valor)} onClick={() => showPanel(ct)}>
+          <div key={ct.id} class={getItemClass('mx-auto w-full h-12 rounded-xl flex flex-row text-white font-semibold cursor-pointer',ct.valor)} onClick={() => showPanel(ct)}>
             <h1 class="mx-2 my-auto w-4/12">{ct.descricao}</h1>
-            <h1 class="mx-2 my-auto w-1/12">{ct.dia}</h1>
+            <h1 class="mx-2 my-auto w-1/12">{ct.data_pagamento ? new Date(ct.data_pagamento).getDate() : ct.dia}</h1>
             <h1 class="mx-2 my-auto w-2/12">{ct.parcela}</h1>
             <h1 class="mx-2 my-auto w-4/12 flex flex-row-reverse">{Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(ct.valor)}</h1>
             <h1 class="mx-2 my-auto w-1/12 flex flex-row-reverse">{ct.data_pagamento ? <FaCheckCircle size={24} class="mx-1" /> : <div></div>}</h1>
@@ -160,8 +183,12 @@ export default function Home() {
                 {getBancoSelect(ct)}
               </div>
               <div class="flex flex-row-reverse">
-                <button class="appearence-none focus:outline-none my-2 mr-2 bg-blue-500 hover:bg-blue-700 p-2 rounded-lg font-semibold text-white"
-                  onClick={() => handleEdit(ct)}>Confirmar</button>
+                <div class="w-full flex flex-row-reverse">
+                  <button class="appearence-none focus:outline-none my-2 mr-2 bg-blue-500 hover:bg-blue-700 p-2 rounded-lg font-semibold text-white"
+                    onClick={() => handleEdit(ct)}>Confirmar</button>
+                </div>
+                <button class="appearence-none focus:outline-none my-2 mr-2 bg-white border-2 border-red-500 hover:bg-red-100 p-2 rounded-lg font-semibold"
+                    onClick={() => handleDelete(ct)}>Excluir</button>
               </div>
             </div>            
           </div>
@@ -246,6 +273,23 @@ export default function Home() {
           </div>
           <div class="overflow-auto">
             {list}
+          </div>
+          
+        </div>
+        <div class="w-full py-2 mb-2 px-2 text-xl font-semibold border-t border-gray-700 flex flex-row">
+          <div>
+            <label>Em aberto:</label>
+            <label class="px-2">{emAberto}</label>
+          </div>
+          <div class="flex flex-row-reverse flex-grow">
+            <div class="flex flex-row">
+              <label class="pr-4">
+                Saldo Final
+              </label>
+              <label class={getItemClass("font-bold rounded px-2 text-white",valorTotal)}>
+                {Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valorTotal)}
+              </label>
+            </div>
           </div>
         </div>
       </main>

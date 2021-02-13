@@ -33,6 +33,11 @@ export default async (req, res) => {
         await api.patch(`/contas/${month}/${id}.json`,req.body).then(response => {
             res.status(response.status).json(response.data);
         });
+    } else if ( (req.method === 'DELETE') ) {
+        let id = req.query.id;
+        await api.delete(`/contas/${month}/${id}.json`,{}).then(response => {
+            res.status(response.status).json(response.data);
+        });
     }
   }
   
