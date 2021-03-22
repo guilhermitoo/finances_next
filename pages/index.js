@@ -21,9 +21,21 @@ export default function Home() {
   const [valorTotal,SetValorTotal] = useState(0);
   const [emAberto,SetEmAberto] = useState(0);
 
+  const [loading,SetLoading] = useState(true);
+
   useEffect(() => {
     loadContas(_data);    
   },[]);
+
+  useEffect(() => {
+    if (loading) {
+      document.querySelector(`#pnl_loading`).classList.remove("hidden");
+      document.querySelector(`#pnl_lista`).classList.add("hidden");
+    } else {
+      document.querySelector(`#pnl_loading`).classList.add("hidden");
+      document.querySelector(`#pnl_lista`).classList.remove("hidden");     
+    }
+  },[loading]);
 
   useEffect(() => {
     loadBancos();
@@ -55,8 +67,10 @@ export default function Home() {
     Set_Data(dt);
     SetMes(getMonthName(dt.getMonth()));
     SetAno(dt.getFullYear());
+    SetLoading(true);
     await apiLocal.get(`/api/bills?month=${dat}`,{}).then(response => {      
       SetContas(response.data);
+      SetLoading(false);
     });     
   }
 
@@ -248,7 +262,7 @@ export default function Home() {
           </div>
           <button class="bg-gray-600 my-2 px-4 font-semibold text-white shadow-lg appearence-none focus:outline-none hover:bg-gray-800 rounded-xl" 
               onClick={NextMonth}>Próximo</button>
-        </div>
+        </div>        
         <div class="flex flex-col flex-grow overflow-auto">
           <div class="mx-auto w-full py-2 bg-gray-300 rounded-xl mb-2 flex flex-row font-semibold">
             <div class="mx-2 my-auto w-4/12">Descrição</div>
@@ -297,8 +311,13 @@ export default function Home() {
                   Cadastrar Conta</button>
               </div>
             </div>            
+          </div>          
+
+          <div class="m-auto" id="pnl_loading">
+            <div class="lds-default"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
           </div>
-          <div class="overflow-auto">
+
+          <div class="overflow-auto" id="pnl_lista">
             {list}
           </div>
           
