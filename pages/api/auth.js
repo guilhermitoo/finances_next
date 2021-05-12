@@ -1,33 +1,28 @@
-import { resolveHref } from 'next/dist/next-server/lib/router/router';
 import api from '../../lib/db.js';
 import sjcl from '../../sjcl.js';
+import jwt from 'jsonwebtoken';
 
 
 async function credentialExists(uid,upx) {
+    let ret = false;
     await api.get(`/credenciais.json`,{}).then(response => {
         let cred = {uid,upx};
         if (response.data) {            
             let creds = response.data.filter(function (el) {
                 return el != null;
-              });
+            });
 
-            let r = creds.some( function (obj) {return obj.uid == '1@gmail.com'});
-            
-            if (r) {
-                return true;
-            } else 
-            {
-                return false;
-            }
-            
+            ret = creds.some( function (obj) {return (obj.uid == cred.uid) && (obj.upx == cred.upx)});
         } else { return false; }
     });
+    return ret;
 }
 
-function doAuthenticate(uid) {
-    // let token = sjcl.hash.sha256(uid);
-    let token = 'teste'+uid; 
-    return {token};
+async function doAuthenticate(obj) {
+    // let token = sjcl.hash.sha256.hash(uid);
+    // let token = 'teste'+uid; 
+    let token = jwt.sign(obj, 'secret', { algorithm: 'RS256' , expiresIn : '24h'});
+    return {"token":token};
 }
 
 export default async (req, res) => {
@@ -37,16 +32,13 @@ export default async (req, res) => {
         res.statusCode = 401;
         let uid = req.body.uid;
         let upx = req.body.upx;        
-    
-        console.log(await credentialExists(uid,upx));
 
-        if (true) {
+        if (await credentialExists(uid,upx)) {
             res.statusCode = 200;
-            res.json(doAuthenticate(uid));
+            res.json(await doAuthenticate({uid,upx}));
         } else {
             res.statusCode = 401;
             res.json({"message": "Unautorized"});
         }
-
     }
 }
