@@ -2,7 +2,6 @@ import api from '../../lib/db.js';
 import sjcl from '../../sjcl.js';
 import jwt from 'jsonwebtoken';
 
-
 async function credentialExists(uid,upx) {
     let ret = false;
     await api.get(`/credenciais.json`,{}).then(response => {
