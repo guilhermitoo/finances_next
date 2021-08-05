@@ -23,9 +23,13 @@ export default function Home() {
 
   const [loading,SetLoading] = useState(true);
 
+  // carrega os bancos e depois as contas
   useEffect(() => {
-    loadContas(_data);    
+    loadBancos();    
   },[]);
+  useEffect(() => {
+    loadContas(_data);
+  },[bancos]);
 
   useEffect(() => {
     if (loading) {
@@ -38,7 +42,6 @@ export default function Home() {
   },[loading]);
 
   useEffect(() => {
-    loadBancos();
     loadList();
     if (contas.length > 0) {
       SetValorTotal(contas.reduce(function(acc, val) { return parseFloat(acc) + parseFloat(val.valor); }, 0));
