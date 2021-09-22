@@ -14,10 +14,12 @@
     "firebase": "^8.2.4",
     "jsonwebtoken": "^8.5.1",
     "next": "10.0.5",
-    "postcss": "^8.2.4",
+    "next-auth": "^3.29.0",
+    "postcss": "^8.3.6",
     "react": "17.0.1",
     "react-dom": "17.0.1",
     "react-icons": "^4.1.0",
+    "sqlite3": "^5.0.2",
     "tailwindcss": "^2.0.2"
   }
 }
