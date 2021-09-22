@@ -4,9 +4,9 @@ export default async (req, res) => {
     res.statusCode = 200;
     // console.log(req.query.month);
     let month = req.query.month;
+    let user = req.query.user;
 
     if (req.method === 'GET') {
-    
         await api.get(`/contas/${month}.json`,{}).then(response => {
         // await api.get(`/contas.json`,{}).then(response => {
             if (response.data) {
@@ -18,7 +18,13 @@ export default async (req, res) => {
                 });
                 rsp.sort(function(a,b) {
                     return b.valor - a.valor;
-                });                
+                });              
+                rsp = rsp.filter(function(a) {
+                    if (('usuario' in a) && (a.usuario === user)) {
+                        return true;
+                    }
+                    else { return false; }                    
+                });
                 res.json(rsp);     
             } else {
                 res.json([]);
