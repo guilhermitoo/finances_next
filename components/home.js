@@ -4,6 +4,7 @@ import axios from 'axios';
 import {FaCheckCircle, FaPlusCircle} from 'react-icons/fa';
 import {getNextMonth,getMonthName} from '../global.js';
 import { useSession } from 'next-auth/client';
+import { useRouter } from 'next/router';
 
 const apiLocal = axios.create();
 
@@ -15,6 +16,7 @@ export default function Home() {
   const [contas,SetContas] = useState([]);
   const [bancos,SetBancos] = useState([]);
   const [list,SetList] = useState();
+  const router = useRouter()
 
   const [cad_descricao,SetCad_Descricao] = useState('');
   const [cad_dia,SetCad_Dia] = useState(10);
@@ -28,7 +30,6 @@ export default function Home() {
   // carrega os bancos e depois as contas
   useEffect(() => {
     loadBancos();    
-    console.log(JSON.stringify(session));
   },[]);
   useEffect(() => {
     loadContas(_data);
@@ -63,7 +64,7 @@ export default function Home() {
   },[contas]);
 
   async function loadBancos() {
-    await apiLocal.get(`/api/banks`,{}).then(response => {      
+    await apiLocal.get(`/api/banks?user=${session.user.email}`,{}).then(response => {      
       SetBancos(response.data);
     }); 
   }
@@ -186,13 +187,24 @@ export default function Home() {
   }
 
   function getBancoSelect(ct) {
-    return  <select class="w-2/3 appearence-none focus:outline-none p-2 m-2 border-gray-1 border-1 rounded shadow"
+    return  <div class="w-2/3 flex flex-row mx-2">
+            <select class="w-full appearence-none focus:outline-none py-2 my-2 mr-2 border-gray-1 border-1 rounded shadow"
               onChange={e => handleBancoChange(e,ct)}>
               {bancos.map(bc => (
                 <option key={bc.id}>{bc.nome}</option>
-              ))} 
+              ))}               
               
             </select>
+             
+            <a class="my-auto appearence-none focus:outline-none" title="Cadastro de Contas/Bancos para Recebimento"
+              onClick={(e) => {if (confirm('Confirma abertura do cadastro de Contas/Bancos para recebimento?')){
+                e.preventDefault();
+                
+                window.location.replace("/bancos");
+              }}}>
+              <FaPlusCircle size={26} class="text-green-700 hover:text-green-900" />
+            </a>
+          </div>
   }
 
   function loadList() {
@@ -223,8 +235,8 @@ export default function Home() {
                   value={ct.valor} onChange={e => handleValorChange(e,ct)}></input>
               </div>              
               <div class="w-full flex flex-row">
-                <div class="w-1/3 my-auto">
-                  <text class="font-semibold">Conta</text>
+                <div class="w-1/3 my-auto flex">
+                  <text class="font-semibold">Banco/Conta</text>
                 </div>
                 {getBancoSelect(ct)}
               </div>
@@ -253,99 +265,93 @@ export default function Home() {
     loadContas(dt);
   }
 
-  return (
-    <div class="text-xs md:text-sm lg:text-base h-full">
-      <Head>
-        <title>Finances</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <div class="flex flex-col mx-auto px-4 md:w-1/2 h-full">
-        <div class="w-full flex flex-row">
-          <button class="bg-gray-600 my-2 px-4 font-semibold text-white shadow-lg appearence-none focus:outline-none hover:bg-gray-800 rounded-xl"
-              onClick={PreviousMonth}>Anterior</button>
-          <div class="mx-auto">
-            <h1 class="mx-auto font-bold text-xl my-4">{mes} de {ano}</h1>
-          </div>
-          <button class="bg-gray-600 my-2 px-4 font-semibold text-white shadow-lg appearence-none focus:outline-none hover:bg-gray-800 rounded-xl" 
-              onClick={NextMonth}>Próximo</button>
-        </div>        
-        <div class="flex flex-col flex-grow overflow-auto">
-          <div class="mx-auto w-full py-2 bg-gray-300 rounded-xl mb-2 flex flex-row font-semibold">
-            <div class="mx-2 my-auto w-4/12">Descrição</div>
-            <div class="mx-2 my-auto w-1/12">Dia</div>
-            <div class="mx-2 my-auto w-2/12">Parcela</div>
-            <div class="mx-2 my-auto w-4/12 flex flex-row-reverse">Valor</div>
-            <div class="mx-2 my-auto w-1/12 flex flex-row-reverse">Pago</div>
-          </div>
-          <button class="appearence-none focus:outline-none mb-2 rounded-xl text-lg font-semibold w-auto mx-auto" 
-            onClick={() => {document.querySelector('#nova_conta').classList.toggle("hidden");}}>
-            <FaPlusCircle size={32} class="mx-auto text-gray-700" />  
-          </button>
-          <div class="mb-1 hidden" id="nova_conta">
-            <div class="bg-gray-100 shadow rounded-lg mx-4 px-2 flex flex-col border">
-              <div class="w-full flex flex-row">
-                <div class="w-1/3 my-auto">
-                  <text class="font-semibold">Descrição</text>
-                </div>
-                <input type="text" class="w-2/3 appearence-none focus:outline-none p-2 m-2 border-gray-1 border-1 rounded shadow"
-                  data={cad_descricao} onChange={e => SetCad_Descricao(e.target.value)}></input>
-              </div>
-              <div class="w-full flex flex-row">
-                <div class="w-1/3 my-auto">
-                  <text class="font-semibold">Dia Venc.</text>
-                </div>
-                <input type="number" class="w-2/3 appearence-none focus:outline-none p-2 m-2 border-gray-1 border-1 rounded shadow"
-                  data={cad_dia} onChange={e => SetCad_Dia(e.target.value)}></input>
-              </div>
-              <div class="w-full flex flex-row">
-                <div class="w-1/3 my-auto">
-                  <text class="font-semibold">Parcela</text>
-                </div>
-                <input type="text" class="w-2/3 appearence-none focus:outline-none p-2 m-2 border-gray-1 border-1 rounded shadow"
-                  data={cad_parcela} onChange={e => SetCad_Parcela(e.target.value)}></input>
-              </div>
-              <div class="w-full flex flex-row">
-                <div class="w-1/3 my-auto">
-                  <text class="font-semibold">Valor</text>
-                </div>
-                <input type="number" class="w-2/3 appearence-none focus:outline-none p-2 m-2 border-gray-1 border-1 rounded shadow"
-                  data={cad_valor} onChange={e => SetCad_Valor(e.target.value)}></input>
-              </div>              
-              <div class="flex flex-row-reverse">
-                <button class="appearence-none focus:outline-none my-2 mr-2 bg-blue-500 hover:bg-blue-700 p-2 rounded-lg font-semibold text-white"
-                  onClick={handleInsert}>
-                  Cadastrar Conta</button>
-              </div>
-            </div>            
-          </div>          
-
-          <div class="m-auto" id="pnl_loading">
-            <div class="lds-default"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
-          </div>
-
-          <div class="overflow-auto" id="pnl_lista">
-            {list}
-          </div>
-          
+  return (    
+    <div class="flex flex-col h-full">
+      <div class="w-full flex flex-row">
+        <button class="bg-gray-600 my-2 px-4 font-semibold text-white shadow-lg appearence-none focus:outline-none hover:bg-gray-800 rounded-xl"
+            onClick={PreviousMonth}>Anterior</button>
+        <div class="mx-auto">
+          <h1 class="mx-auto font-bold text-xl my-4">{mes} de {ano}</h1>
         </div>
-        <div class="w-full py-2  text-lg font-semibold border-t border-gray-700 flex flex-row">
-          <div>
-            <label>Aberto:</label>
-            <label class="px-2">{emAberto}</label>
-          </div>
-          <div class="w-full">
-            <button class="flex mx-auto border border-gray-700 px-2 rounded-lg" onClick={importarContas}>Importar</button>
-          </div>
-          <div class="flex flex-row-reverse flex-grow">
-            <div class="flex flex-row">
-              <label class={getItemClass("font-bold rounded px-2 text-white w-32",valorTotal)}>
-                {Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valorTotal)}
-              </label>
+        <button class="bg-gray-600 my-2 px-4 font-semibold text-white shadow-lg appearence-none focus:outline-none hover:bg-gray-800 rounded-xl" 
+            onClick={NextMonth}>Próximo</button>
+      </div>        
+      <div class="flex flex-col flex-grow overflow-auto">
+        <div class="mx-auto w-full py-2 bg-gray-300 rounded-xl mb-2 flex flex-row font-semibold">
+          <div class="mx-2 my-auto w-4/12">Descrição</div>
+          <div class="mx-2 my-auto w-1/12">Dia</div>
+          <div class="mx-2 my-auto w-2/12">Parcela</div>
+          <div class="mx-2 my-auto w-4/12 flex flex-row-reverse">Valor</div>
+          <div class="mx-2 my-auto w-1/12 flex flex-row-reverse">Pago</div>
+        </div>
+        <button class="appearence-none focus:outline-none mb-2 rounded-xl text-lg font-semibold w-auto mx-auto" 
+          onClick={() => {document.querySelector('#nova_conta').classList.toggle("hidden");}}
+          title="Nova Movimentação (finança)">
+          <FaPlusCircle size={32} class="mx-auto text-gray-700 hover:text-gray-900" />  
+        </button>
+        <div class="mb-1 hidden" id="nova_conta">
+          <div class="bg-gray-100 shadow rounded-lg mx-4 px-2 flex flex-col border">
+            <div class="w-full flex flex-row">
+              <div class="w-1/3 my-auto">
+                <text class="font-semibold">Descrição</text>
+              </div>
+              <input type="text" class="w-2/3 appearence-none focus:outline-none p-2 m-2 border-gray-1 border-1 rounded shadow"
+                data={cad_descricao} onChange={e => SetCad_Descricao(e.target.value)}></input>
             </div>
+            <div class="w-full flex flex-row">
+              <div class="w-1/3 my-auto">
+                <text class="font-semibold">Dia Venc.</text>
+              </div>
+              <input type="number" class="w-2/3 appearence-none focus:outline-none p-2 m-2 border-gray-1 border-1 rounded shadow"
+                data={cad_dia} onChange={e => SetCad_Dia(e.target.value)}></input>
+            </div>
+            <div class="w-full flex flex-row">
+              <div class="w-1/3 my-auto">
+                <text class="font-semibold">Parcela</text>
+              </div>
+              <input type="text" class="w-2/3 appearence-none focus:outline-none p-2 m-2 border-gray-1 border-1 rounded shadow"
+                data={cad_parcela} onChange={e => SetCad_Parcela(e.target.value)}></input>
+            </div>
+            <div class="w-full flex flex-row">
+              <div class="w-1/3 my-auto">
+                <text class="font-semibold">Valor</text>
+              </div>
+              <input type="number" class="w-2/3 appearence-none focus:outline-none p-2 m-2 border-gray-1 border-1 rounded shadow"
+                data={cad_valor} onChange={e => SetCad_Valor(e.target.value)}></input>
+            </div>              
+            <div class="flex flex-row-reverse">
+              <button class="appearence-none focus:outline-none my-2 mr-2 bg-blue-500 hover:bg-blue-700 p-2 rounded-lg font-semibold text-white"
+                onClick={handleInsert}>
+                Cadastrar Finança</button>
+            </div>
+          </div>            
+        </div>          
+
+        <div class="m-auto" id="pnl_loading">
+          <div class="lds-default"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+        </div>
+
+        <div class="overflow-auto" id="pnl_lista">
+          {list}
+        </div>
+        
+      </div>
+      <div class="w-full py-2  text-lg font-semibold border-t border-gray-700 flex flex-row">
+        <div>
+          <label>Aberto:</label>
+          <label class="px-2">{emAberto}</label>
+        </div>
+        <div class="w-full">
+          <button class="flex mx-auto border border-gray-700 px-2 rounded-lg" onClick={importarContas}>Importar</button>
+        </div>
+        <div class="flex flex-row-reverse flex-grow">
+          <div class="flex flex-row">
+            <label class={getItemClass("font-bold rounded px-2 text-white w-32",valorTotal)}>
+              {Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valorTotal)}
+            </label>
           </div>
         </div>
       </div>
-    </div>    
+    </div>   
   )
 }

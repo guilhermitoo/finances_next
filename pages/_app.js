@@ -26,6 +26,10 @@ export default function App ({ Component, pageProps }) {
         keepAlive: 0
       }}
       session={pageProps.session} >
+      <head>
+        <title>Finances</title>
+        <link rel="icon" href="favicon.ico" />
+      </head>
       <Component {...pageProps} />
     </Provider>
   )

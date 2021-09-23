@@ -1,6 +1,9 @@
 export default async (req, res) => {
     res.statusCode = 200;
 
+    // por enquanto desativado
+    return
+
     if (req.method === 'GET') {
     
         await api.get(`/credenciais.json`,{}).then(response => {
