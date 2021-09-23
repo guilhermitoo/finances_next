@@ -8,7 +8,8 @@ export default async (req, res) => {
         res.statusCode = 401;
         res.send({ error: 'Unauthorized' });
     } else {
-
+        
+        let user = req.query.user;
         res.statusCode = 200;
 
         if (req.method === 'GET') {
