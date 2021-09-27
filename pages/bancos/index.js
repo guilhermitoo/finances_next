@@ -11,6 +11,19 @@ export default function Conta () {
   const [list,SetList] = useState();
   const [bancos,SetBancos] = useState();
   const [nome,SetNome] = useState();
+  const [loading,SetLoading] = useState(true);
+
+  // loading
+  useEffect(() => {
+    if (!document.querySelector(`#pnl_loading`)) return
+    if (loading) {
+      document.querySelector(`#pnl_loading`).classList.remove("hidden");
+      document.querySelector(`#pnl_lista`).classList.add("hidden");
+    } else {
+      document.querySelector(`#pnl_loading`).classList.add("hidden");
+      document.querySelector(`#pnl_lista`).classList.remove("hidden");     
+    }
+  },[loading]);
 
   useEffect(() => {
     loadBancos();  
@@ -22,9 +35,11 @@ export default function Conta () {
   },[bancos]);
 
   async function loadBancos() {
+    SetLoading(true);    
     if (!session) return;
 
     await apiLocal.get(`/api/banks?user=${session.user.email}`,{}).then(response => {      
+      SetLoading(false);
       SetBancos(response.data);
     }); 
   }
@@ -47,11 +62,12 @@ export default function Conta () {
   }
 
   async function handleInsert() {
+    let nm = nome;
+    SetNome('');
     await apiLocal.post(`/api/banks`,{
       usuario:session.user.email,
       nome
     }).then(response => {
-      SetNome('');
       setTimeout(() => {
         loadBancos();        
       },1000);      
@@ -79,9 +95,9 @@ export default function Conta () {
 
   return (
       <Page>
-        <div class="flex flex-col">
+        <div class="flex flex-col h-full">
           <div class="flex flex-row w-full">
-            <button class="w-3/6 bg-gray-600 my-2 py-2 px-4 font-semibold text-white shadow-lg appearence-none focus:outline-none hover:bg-gray-800 rounded-xl"
+            <button class="w-3/6 bg-gray-600 my-2 py-2 px-4 font-semibold text-white shadow appearence-none focus:outline-none hover:bg-gray-800 rounded-xl"
               onClick={(e) => {
                 e.preventDefault();
                 window.location.replace("/");
@@ -92,7 +108,7 @@ export default function Conta () {
               Novo Banco/Conta</button> */}
             </div>
           </div>
-          <div class="bg-gray-200 rounded shadow w-full flex flex-row">
+          <div class="bg-gray-200 rounded shadow w-full flex flex-row ">
               <div class="w-full m-2">
                 <h1 class="font-semibold">Descrição do Banco/Conta</h1>
                 <input class="w-full appearence-none focus:outline-none p-2 my-1 border-gray-1 border-1 rounded shadow"
@@ -104,8 +120,12 @@ export default function Conta () {
                     >Cadastrar</button>
               </div>   
           </div>
-          <div class="border border-gray-200 rounded w-full mt-2">
-            <div class="overflow-auto" id="pnl_lista">
+          <div class="border border-gray-200 rounded w-full mt-2 flex flex-grow mb-4">
+            <div class="m-auto" id="pnl_loading">
+              <div class="lds-default"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+            </div>
+
+            <div class="overflow-auto w-full hidden" id="pnl_lista">
               {list}
             </div>
           </div>

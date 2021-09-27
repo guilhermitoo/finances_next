@@ -193,7 +193,7 @@ export default function Home() {
               
             </select>
              
-            <a class="my-auto appearence-none focus:outline-none" title="Cadastro de Contas/Bancos para Recebimento"
+            <a class="my-auto appearence-none focus:outline-none cursor-pointer" title="Cadastro de Contas/Bancos para Recebimento"
               onClick={(e) => {if (confirm('Confirma abertura do cadastro de Contas/Bancos para recebimento?')){
                 e.preventDefault();
                 
