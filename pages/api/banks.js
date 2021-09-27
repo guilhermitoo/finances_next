@@ -22,6 +22,11 @@ export default async (req, res) => {
                             rsp[index].id = val;
                         }
                     });
+                    Object.keys(response.data).forEach((val,index,arr) => {
+                        if (typeof rsp[index] === 'object') {
+                            rsp[index].ind = index;
+                        }
+                    });                    
                     rsp = rsp.filter(function(a) {
                         if (('usuario' in a) && (a.usuario === user)) {
                             return true;
@@ -33,6 +38,16 @@ export default async (req, res) => {
                     res.json([]);
                 }
             });
+        }
+        else if ( (req.method === 'POST') ) {
+            await api.post(`/bancos.json`,req.body).then(response => {
+                res.status(response.status).json(response.data);
+            });
+        }else if (req.method === 'DELETE') {
+            let id = req.query.id;
+            await api.delete(`/bancos/${id}.json`,{}).then(response => {
+                res.status(response.status).json(response.data);
+            });            
         }
     }
 }

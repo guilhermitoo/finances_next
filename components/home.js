@@ -1,22 +1,19 @@
-import Head from 'next/head';
 import {useEffect,useState} from 'react';
 import axios from 'axios';
 import {FaCheckCircle, FaPlusCircle} from 'react-icons/fa';
 import {getNextMonth,getMonthName} from '../global.js';
 import { useSession } from 'next-auth/client';
-import { useRouter } from 'next/router';
 
 const apiLocal = axios.create();
 
 export default function Home() {
-  const [session,ldng ] = useSession()
+  const [session,ldng ] = useSession();
   const [_data,Set_Data] = useState(new Date());
   const [mes,SetMes] = useState();
   const [ano,SetAno] = useState();
   const [contas,SetContas] = useState([]);
   const [bancos,SetBancos] = useState([]);
   const [list,SetList] = useState();
-  const router = useRouter()
 
   const [cad_descricao,SetCad_Descricao] = useState('');
   const [cad_dia,SetCad_Dia] = useState(10);
