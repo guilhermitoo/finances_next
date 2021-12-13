@@ -61,7 +61,7 @@ export default function Home() {
   },[contas]);
 
   async function loadBancos() {
-    await apiLocal.get(`/api/banks?user=${session.user.email}`,{}).then(response => {      
+    await apiLocal.get(`/api/banks`,{}).then(response => {      
       SetBancos(response.data);
     }); 
   }
@@ -72,7 +72,7 @@ export default function Home() {
     SetMes(getMonthName(dt.getMonth()));
     SetAno(dt.getFullYear());
     SetLoading(true);
-    await apiLocal.get(`/api/bills?month=${dat}&user=${session.user.email}`,{}).then(response => {      
+    await apiLocal.get(`/api/bills?month=${dat}`,{}).then(response => {      
       SetContas(response.data);
       SetLoading(false);
     });     
@@ -99,7 +99,7 @@ export default function Home() {
     let _dt = await getNextMonth(_data,-1);    
     let dat = String(_dt.getMonth()+1) + _dt.getFullYear();
     
-    await apiLocal.get(`/api/bills?month=${dat}&user=${session.user.email}`,{}).then(response => {      
+    await apiLocal.get(`/api/bills?month=${dat}`,{}).then(response => {      
       response.data.forEach(element => {
         if (element.parcela) {
           let parc = element.parcela;
@@ -152,7 +152,6 @@ export default function Home() {
   async function handleInsert() {
     let dat = String(_data.getMonth()+1) + _data.getFullYear();
     await apiLocal.post(`/api/bills?month=${dat}`,{
-      usuario:session.user.email,
       descricao:cad_descricao,
       dia:cad_dia,
       parcela:cad_parcela,

@@ -16,7 +16,8 @@ module.exports = {
   variants: {
     extend: {
       backgroundColor: ['even'],
-    }
+    },
+    opacity: ({ after }) => after(['disabled'])
   },
   plugins: [],
 }

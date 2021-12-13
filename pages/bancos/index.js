@@ -2,15 +2,16 @@ import Page from '../../components/page';
 import {useEffect, useState} from 'react';
 import axios from 'axios';
 import { useSession } from 'next-auth/client';
-import {FaTrashAlt} from 'react-icons/fa';
+import {FaTerminal, FaTrashAlt} from 'react-icons/fa';
+import { stringify } from 'postcss';
 
 const apiLocal = axios.create();
 
 export default function Conta () {
   const [session,ldng ] = useSession();    
   const [list,SetList] = useState();
-  const [bancos,SetBancos] = useState();
-  const [nome,SetNome] = useState();
+  const [bancos,SetBancos] = useState([]);
+  const [nome,SetNome] = useState('');
   const [loading,SetLoading] = useState(true);
 
   // loading
@@ -19,9 +20,11 @@ export default function Conta () {
     if (loading) {
       document.querySelector(`#pnl_loading`).classList.remove("hidden");
       document.querySelector(`#pnl_lista`).classList.add("hidden");
+      document.querySelector(`#btn_cad`).disabled = true;
     } else {
       document.querySelector(`#pnl_loading`).classList.add("hidden");
       document.querySelector(`#pnl_lista`).classList.remove("hidden");     
+      document.querySelector(`#btn_cad`).disabled = false;
     }
   },[loading]);
 
@@ -38,7 +41,7 @@ export default function Conta () {
     SetLoading(true);    
     if (!session) return;
 
-    await apiLocal.get(`/api/banks?user=${session.user.email}`,{}).then(response => {      
+    await apiLocal.get(`/api/banks`,{}).then(response => {      
       SetLoading(false);
       SetBancos(response.data);
     }); 
@@ -62,17 +65,46 @@ export default function Conta () {
   }
 
   async function handleInsert() {
-    let nm = nome;
-    SetNome('');
-    await apiLocal.post(`/api/banks`,{
-      usuario:session.user.email,
+    let nm = String(nome).trim();
+
+    document.querySelector(`#btn_cad`).disabled = true;
+    setTimeout(function() {
+      document.querySelector(`#btn_cad`).disabled = false;
+    },2000);
+
+    // valida nome vazio
+    if ( nm === "" ) {
+      alert("Nome inválido ou não informado!");
+      SetNome('');
+      return;
+    }
+    
+    // valida nome já cadastrado
+    if (bancos.length === 0 ) {
+      Insert(nome);
+    } else {
+      bancos.forEach((val,index,arr) => {
+        if (bancos[index].nome === nm) {
+          alert("Nome já cadastrado!");
+          return;
+        }
+        if (index === bancos.length -1) {
+          Insert(nome);
+        }
+      });    
+    }
+  }   
+
+  function Insert(nome) {
+    apiLocal.post(`/api/banks`,{
       nome
     }).then(response => {
-      setTimeout(() => {
-        loadBancos();        
-      },1000);      
-    });
-  }   
+      if (response.status = 200) {
+        loadBancos();
+        SetNome('');
+      }   
+    });    
+  }
 
   function loadList() {
     if (!bancos) return;
@@ -117,6 +149,7 @@ export default function Conta () {
               <div class="w-auto flex mx-auto pb-2 pt-4 mt-2 flex-row-reverse">
               <button class="appearence-none focus:outline-none mx-2 bg-blue-500 hover:bg-blue-700 px-2 rounded-lg font-semibold text-white"
                     onClick={handleInsert}
+                    id="btn_cad"
                     >Cadastrar</button>
               </div>   
           </div>

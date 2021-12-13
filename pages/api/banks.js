@@ -8,8 +8,8 @@ export default async (req, res) => {
         res.statusCode = 401;
         res.send({ error: 'Unauthorized' });
     } else {
-        
-        let user = req.query.user;
+        let user = session.user.email;
+
         res.statusCode = 200;
 
         if (req.method === 'GET') {
@@ -40,6 +40,7 @@ export default async (req, res) => {
             });
         }
         else if ( (req.method === 'POST') ) {
+            req.body.usuario = session.user.email;            
             await api.post(`/bancos.json`,req.body).then(response => {
                 res.status(response.status).json(response.data);
             });

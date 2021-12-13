@@ -8,11 +8,11 @@ export default async (req, res) => {
         res.statusCode = 401;
         res.send({ error: 'Unauthorized' });
     } else {
-
-        res.statusCode = 200;
         // console.log(req.query.month);
         let month = req.query.month;
-        let user = req.query.user;
+        let user = session.user.email;
+
+        res.statusCode = 200;        
 
         if (req.method === 'GET') {
             await api.get(`/contas/${month}.json`,{}).then(response => {
@@ -39,11 +39,13 @@ export default async (req, res) => {
                 }
             });
         } else if ( (req.method === 'POST') ) {
+            req.body.usuario = session.user.email;
             await api.post(`/contas/${month}.json`,req.body).then(response => {
                 res.status(response.status).json(response.data);
             });
         } else if ( (req.method === 'PATCH') ) {
             let id = req.body.id;
+            req.body.usuario = session.user.email;            
             await api.patch(`/contas/${month}/${id}.json`,req.body).then(response => {
                 res.status(response.status).json(response.data);
             });
