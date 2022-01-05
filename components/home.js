@@ -24,26 +24,16 @@ export default function Home() {
 
   const [loading,SetLoading] = useState(true);
 
-  // carrega os bancos e depois as contas
   useEffect(() => {
-    loadBancos();    
-  },[]);
-  useEffect(() => {
-    loadContas(_data);
-  },[bancos]);
+    updateContas();
+  },[contas])
 
-  useEffect(() => {
-    if (loading) {
-      document.querySelector(`#pnl_loading`).classList.remove("hidden");
-      document.querySelector(`#pnl_lista`).classList.add("hidden");
-    } else {
-      document.querySelector(`#pnl_loading`).classList.add("hidden");
-      document.querySelector(`#pnl_lista`).classList.remove("hidden");     
-    }
-  },[loading]);
-
-  useEffect(() => {
+  function updateContas() {
     loadList();
+    updateTotalizadores();
+  }
+
+  function updateTotalizadores() {
     if (contas.length > 0) {
       SetValorTotal(contas.reduce(function(acc, val) { return parseFloat(acc) + parseFloat(val.valor); }, 0));
       SetEmAberto(contas.reduce(function(acc, val) 
@@ -57,8 +47,29 @@ export default function Home() {
     } else {
       SetValorTotal(0);
       SetEmAberto(0);
+    }    
+  }
+
+  // carrega os bancos e depois as contas
+  useEffect(() => {
+    loadBancos();    
+  },[]);
+  useEffect(() => {
+    SetLoading(true);
+    loadContas(_data).then(c => {
+      SetLoading(false);
+    });
+  },[bancos]);
+
+  useEffect(() => {
+    if (loading) {
+      document.querySelector(`#pnl_loading`).classList.remove("hidden");
+      document.querySelector(`#pnl_lista`).classList.add("hidden");
+    } else {
+      document.querySelector(`#pnl_loading`).classList.add("hidden");
+      document.querySelector(`#pnl_lista`).classList.remove("hidden");     
     }
-  },[contas]);
+  },[loading]);
 
   async function loadBancos() {
     await apiLocal.get(`/api/banks`,{}).then(response => {      
@@ -71,10 +82,13 @@ export default function Home() {
     Set_Data(dt);
     SetMes(getMonthName(dt.getMonth()));
     SetAno(dt.getFullYear());
-    SetLoading(true);
+    let old_contas = contas;
+    let new_contas = [];
     await apiLocal.get(`/api/bills?month=${dat}`,{}).then(response => {      
-      SetContas(response.data);
-      SetLoading(false);
+      new_contas = response.data;
+      if ( old_contas !== new_contas ) {
+        SetContas(new_contas);
+      }
     });     
   }
 
@@ -98,7 +112,7 @@ export default function Home() {
     // importar contas do mês anterior
     let _dt = await getNextMonth(_data,-1);    
     let dat = String(_dt.getMonth()+1) + _dt.getFullYear();
-    
+    SetLoading(true);
     await apiLocal.get(`/api/bills?month=${dat}`,{}).then(response => {      
       response.data.forEach(element => {
         if (element.parcela) {
@@ -121,7 +135,9 @@ export default function Home() {
         }
       });      
     }).then(() => {
-      loadContas(_data);
+      loadContas(_data).then(c => {
+        SetLoading(false);  
+      });
     });
   }
 
@@ -133,35 +149,62 @@ export default function Home() {
     //conta.data_pagamento = new Date().toJSON();
     let dat = String(_data.getMonth()+1) + _data.getFullYear();
     await apiLocal.patch(`/api/bills?month=${dat}`,conta).then(response => {
-      showPanel(conta);
-      loadContas(_data);      
+      if (response.status === 200) {
+        showPanel(conta);     
+        updateTotalizadores();
+      } else {
+        alert('Erro ao editar o registro. '+str(response.statusText));
+      }  
     });
   }
 
   async function handleDelete(conta) {
-    if (!confirm('Confirma exclusão da conta?')) {
+    if (!confirm('Confirma exclusão da movimentação?')) {
       return
     }
     let dat = String(_data.getMonth()+1) + _data.getFullYear();
+    let cid = conta.id;
     await apiLocal.delete(`/api/bills?month=${dat}&id=${conta.id}`).then(response => {
-      showPanel(conta);
-      loadContas(_data);      
+      if (response.status === 200) {
+        let lc = contas;
+        lc = lc.filter(function(a) {
+          if ((a.id == cid)) {
+              return false;
+          }
+          else { return true; }                    
+        });
+        showPanel(conta);
+        SetContas(lc);
+      } else {
+        alert('Erro ao excluir o registro. '+str(response.statusText));
+      }      
     });
   }
 
   async function handleInsert() {
     let dat = String(_data.getMonth()+1) + _data.getFullYear();
-    await apiLocal.post(`/api/bills?month=${dat}`,{
+    let bill_obj = {
       descricao:cad_descricao,
       dia:cad_dia,
       parcela:cad_parcela,
       valor:cad_valor,
       data:new Date().toJSON()
-    }).then(response => {
+    };
+    await apiLocal.post(`/api/bills?month=${dat}`,bill_obj).then(response => {
       document.querySelector('#nova_conta').classList.add("hidden");
-      setTimeout(() => {
-        loadContas(_data);        
-      },1000);      
+      if (response.status === 200) {
+        let lc = contas;
+        bill_obj.usuario = session.user.email;
+        bill_obj.id = response.data.name;
+        lc.push(bill_obj);
+        lc.sort(function(a,b) {
+            return b.valor - a.valor;
+        });
+        SetContas(lc);
+        updateContas();
+      } else {
+        alert('Erro ao gravar o registro. '+str(response.statusText));
+      }     
     });
   }
   
@@ -209,7 +252,7 @@ export default function Home() {
         <div>
           <div key={ct.id} class={getItemClass('mx-auto w-full h-12 rounded-xl flex flex-row text-white font-semibold cursor-pointer',ct.valor)} onClick={() => showPanel(ct)}>
             <h1 class="mx-2 my-auto w-4/12">{ct.descricao}</h1>
-            <h1 class="mx-2 my-auto w-1/12">{ct.data_pagamento ? new Date(ct.data_pagamento).getDate() : ct.dia}</h1>
+            <h1 class="mx-2 my-auto w-1/12">{ct.data_pagamento ? new Date(ct.data_pagamento+"T00:00:00").getDate() : ct.dia}</h1>
             <h1 class="mx-2 my-auto w-2/12">{ct.parcela}</h1>
             <h1 class="mx-2 my-auto w-4/12 flex flex-row-reverse">{Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(ct.valor)}</h1>
             <h1 class="mr-2 my-auto w-1/12 flex flex-row-reverse">{ct.data_pagamento ? <FaCheckCircle size={24} class="mx-1" /> : <div></div>}</h1>
@@ -253,12 +296,18 @@ export default function Home() {
 
   async function NextMonth() {
     let dt = await getNextMonth(_data,1);
-    loadContas(dt);
+    SetLoading(true);
+    loadContas(dt).then(c => {
+      SetLoading(false);
+    });
   }
 
   async function PreviousMonth() {
     let dt = await getNextMonth(_data,-1);
-    loadContas(dt);
+    SetLoading(true);
+    loadContas(dt).then(c => {
+      SetLoading(false);
+    });
   }
 
   return (    
