@@ -11,8 +11,8 @@ export default function Home() {
   const [_data,Set_Data] = useState(new Date());
   const [mes,SetMes] = useState();
   const [ano,SetAno] = useState();
-  const [contas,SetContas] = useState([]);
-  const [bancos,SetBancos] = useState([]);
+  const [contas,SetContas] = useState();
+  const [bancos,SetBancos] = useState();
   const [list,SetList] = useState();
 
   const [cad_descricao,SetCad_Descricao] = useState('');
@@ -29,8 +29,10 @@ export default function Home() {
   },[contas])
 
   function updateContas() {
-    loadList();
-    updateTotalizadores();
+    if ( contas ) {
+      loadList();
+      updateTotalizadores();
+    }
   }
 
   function updateTotalizadores() {
@@ -54,6 +56,7 @@ export default function Home() {
   useEffect(() => {
     loadBancos();    
   },[]);
+
   useEffect(() => {
     SetLoading(true);
     loadContas(_data).then(c => {
