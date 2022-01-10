@@ -229,24 +229,26 @@ export default function Home() {
   }
 
   function getBancoSelect(ct) {
-    return  <div class="w-2/3 flex flex-row mx-2">
-            <select class="w-full appearence-none focus:outline-none py-2 my-2 mr-2 border-gray-1 border-1 rounded shadow"
-              onChange={e => handleBancoChange(e,ct)}>
-              {bancos.map(bc => (
-                <option key={bc.id}>{bc.nome}</option>
-              ))}               
-              
-            </select>
-             
-            <a class="my-auto appearence-none focus:outline-none cursor-pointer" title="Cadastro de Contas/Bancos para Recebimento"
-              onClick={(e) => {if (confirm('Confirma abertura do cadastro de Contas/Bancos para recebimento?')){
-                e.preventDefault();
+    if ( bancos ) {
+      return  <div class="w-2/3 flex flex-row mx-2">
+              <select class="w-full appearence-none focus:outline-none py-2 my-2 mr-2 border-gray-1 border-1 rounded shadow"
+                onChange={e => handleBancoChange(e,ct)}>
+                {bancos.map(bc => (
+                  <option key={bc.id}>{bc.nome}</option>
+                ))}               
                 
-                window.location.replace("/bancos");
-              }}}>
-              <FaPlusCircle size={26} class="text-green-700 hover:text-green-900" />
-            </a>
-          </div>
+              </select>
+              
+              <a class="my-auto appearence-none focus:outline-none cursor-pointer" title="Cadastro de Contas/Bancos para Recebimento"
+                onClick={(e) => {if (confirm('Confirma abertura do cadastro de Contas/Bancos para recebimento?')){
+                  e.preventDefault();
+                  
+                  window.location.replace("/bancos");
+                }}}>
+                <FaPlusCircle size={26} class="text-green-700 hover:text-green-900" />
+              </a>
+            </div>
+    }
   }
 
   function loadList() {
