@@ -413,29 +413,29 @@ export default function Home() {
         <div class="flex flex-row">
           <div class="flex w-12">
             <label>Aberto:</label>
-            <label class="px-2">{emAberto}</label>                      
+            <label class="px-1">{emAberto}</label>                      
           </div>          
           <div class="flex flex-row-reverse flex-grow py-1">
             <div class="flex flex-row">
-              <label class="px-2">Estimativa de fim de mês</label>
-              <label class={getItemClass("font-bold rounded px-2 text-white w-32",valorTotal)}>
+              <label class="px-2">Estimativa final</label>
+              <label class={getItemClass("font-bold rounded px-2 text-white w-32 flex flex-row-reverse",valorTotal)}>
                 {Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valorTotal)}
               </label>
             </div>
           </div>
         </div>
         <div>
-        <div class="flex flex-row-reverse flex-grow py-1">
+          <div class="flex flex-row-reverse flex-grow py-1">
             <div class="flex flex-row">
               <label class="px-2">Saldo atual</label>
-              <label class={getItemClass("font-bold rounded px-2 text-white w-32",saldoMes)}>
+              <label class={getItemClass("font-bold rounded px-2 text-white w-32 flex flex-row-reverse",saldoMes)}>
                 {Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(saldoMes)}
               </label>
             </div>
           </div>          
         </div>
         <div class="w-full">
-          <button class="flex mx-auto border border-gray-700 px-2 rounded-lg" onClick={importarContas}>Importar Contas do mês passado</button>
+          <button class="flex mx-auto border border-gray-700 p-2 rounded-lg my-6" onClick={importarContas}>Importar Contas do mês passado</button>
         </div>        
       </div>
     </div>   
