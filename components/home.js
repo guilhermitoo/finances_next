@@ -20,6 +20,7 @@ export default function Home() {
   const [cad_parcela,SetCad_Parcela] = useState();
   const [cad_valor,SetCad_Valor] = useState(0.00);
   const [valorTotal,SetValorTotal] = useState(0);
+  const [saldoMes,SetSaldoMes] = useState(0);
   const [emAberto,SetEmAberto] = useState(0);
 
   const [loading,SetLoading] = useState(true);
@@ -38,6 +39,15 @@ export default function Home() {
   function updateTotalizadores() {
     if (contas.length > 0) {
       SetValorTotal(contas.reduce(function(acc, val) { return parseFloat(acc) + parseFloat(val.valor); }, 0));
+      SetSaldoMes(contas.reduce(function(acc, val) 
+        { 
+          if (!val.data_pagamento) {
+            acc = acc + 0;
+          } else {
+            acc = parseFloat(acc) + parseFloat(val.valor);
+          }       
+          return acc;           
+        }, 0));
       SetEmAberto(contas.reduce(function(acc, val) 
         { 
           if (!val.data_pagamento) {
@@ -49,6 +59,7 @@ export default function Home() {
     } else {
       SetValorTotal(0);
       SetEmAberto(0);
+      SetSaldoMes(0);
     }    
   }
 
@@ -228,6 +239,11 @@ export default function Home() {
     loadList();
   }
 
+  function HandleDescricaoChange(e,ct) {
+    ct.descricao = e.target.value;
+    loadList();
+  }
+
   function getBancoSelect(ct) {
     if ( bancos ) {
       return  <div class="w-2/3 flex flex-row mx-2">
@@ -264,6 +280,13 @@ export default function Home() {
           </div>  
           <div class="mb-1">
             <div class="bg-gray-100 shadow rounded mx-4 px-2 flex flex-col hidden" id={`box${ct.id}`}>
+            <div class="w-full flex flex-row">
+                <div class="w-1/3 my-auto">
+                  <text class="font-semibold">Descrição</text>
+                </div>
+                <input type="text" class="w-2/3 appearence-none focus:outline-none p-2 m-2 border-gray-1 border-1 rounded shadow"
+                  value={ct.descricao} onChange={e => HandleDescricaoChange(e,ct)}></input>                  
+              </div>
               <div class="w-full flex flex-row">
                 <div class="w-1/3 my-auto">
                   <text class="font-semibold">Data Pag.</text>
@@ -386,21 +409,34 @@ export default function Home() {
         </div>
         
       </div>
-      <div class="w-full py-2  text-lg font-semibold border-t border-gray-700 flex flex-row">
-        <div>
-          <label>Aberto:</label>
-          <label class="px-2">{emAberto}</label>
-        </div>
-        <div class="w-full">
-          <button class="flex mx-auto border border-gray-700 px-2 rounded-lg" onClick={importarContas}>Importar</button>
-        </div>
-        <div class="flex flex-row-reverse flex-grow">
-          <div class="flex flex-row">
-            <label class={getItemClass("font-bold rounded px-2 text-white w-32",valorTotal)}>
-              {Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valorTotal)}
-            </label>
+      <div class="w-full py-2 text-lg font-semibold border-t border-gray-700 flex flex-col">        
+        <div class="flex flex-row">
+          <div class="flex w-12">
+            <label>Aberto:</label>
+            <label class="px-2">{emAberto}</label>                      
+          </div>          
+          <div class="flex flex-row-reverse flex-grow py-1">
+            <div class="flex flex-row">
+              <label class="px-2">Estimativa de fim de mês</label>
+              <label class={getItemClass("font-bold rounded px-2 text-white w-32",valorTotal)}>
+                {Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valorTotal)}
+              </label>
+            </div>
           </div>
         </div>
+        <div>
+        <div class="flex flex-row-reverse flex-grow py-1">
+            <div class="flex flex-row">
+              <label class="px-2">Saldo atual</label>
+              <label class={getItemClass("font-bold rounded px-2 text-white w-32",saldoMes)}>
+                {Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(saldoMes)}
+              </label>
+            </div>
+          </div>          
+        </div>
+        <div class="w-full">
+          <button class="flex mx-auto border border-gray-700 px-2 rounded-lg" onClick={importarContas}>Importar Contas do mês passado</button>
+        </div>        
       </div>
     </div>   
   )
