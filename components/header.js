@@ -12,6 +12,8 @@ export default function Header () {
       <noscript>
         <style>{`.nojs-show { opacity: 1; top: 0; }`}</style>
       </noscript>
+      <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9890924604571133"
+        crossorigin="anonymous"></script>      
       <div class="flex flex-col mx-auto px-4 md:w-1/2">
         <p className={`nojs-show ${(!session && loading) ? styles.loading : styles.loaded}`}>
           {!session && <>
