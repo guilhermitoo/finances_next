@@ -270,8 +270,8 @@ export default function Home() {
   function loadList() {
     SetList(
       contas.map(ct => (
-        <div>
-          <div key={ct.id} class={getItemClass('mx-auto w-full h-12 rounded-xl flex flex-row text-white font-semibold cursor-pointer',ct.valor)} onClick={() => showPanel(ct)}>
+        <div key={ct.id}>
+          <div  class={getItemClass('mx-auto w-full h-12 rounded-xl flex flex-row text-white font-semibold cursor-pointer',ct.valor)} onClick={() => showPanel(ct)}>
             <h1 class="mx-2 my-auto w-4/12">{ct.descricao}</h1>
             <h1 class="mx-2 my-auto w-1/12">{ct.data_pagamento ? new Date(ct.data_pagamento+"T00:00:00").getDate() : ct.dia}</h1>
             <h1 class="mx-2 my-auto w-2/12">{ct.parcela}</h1>
@@ -282,28 +282,28 @@ export default function Home() {
             <div class="bg-gray-100 shadow rounded mx-4 px-2 flex flex-col hidden" id={`box${ct.id}`}>
             <div class="w-full flex flex-row">
                 <div class="w-1/3 my-auto">
-                  <text class="font-semibold">Descrição</text>
+                  <a class="font-semibold">Descrição</a>
                 </div>
                 <input type="text" class="w-2/3 appearence-none focus:outline-none p-2 m-2 border-gray-1 border-1 rounded shadow"
                   value={ct.descricao} onChange={e => HandleDescricaoChange(e,ct)}></input>                  
               </div>
               <div class="w-full flex flex-row">
                 <div class="w-1/3 my-auto">
-                  <text class="font-semibold">Data Pag.</text>
+                  <a class="font-semibold">Data Pag.</a>
                 </div>
                 <input type="date" class="w-2/3 appearence-none focus:outline-none p-2 m-2 border-gray-1 border-1 rounded shadow"
                   value={ct.data_pagamento} onChange={e => handleDataPChange(e,ct)}></input>
               </div>
               <div class="w-full flex flex-row">
                 <div class="w-1/3 my-auto">
-                  <text class="font-semibold">Valor</text>
+                  <a class="font-semibold">Valor</a>
                 </div>
                 <input type="number" class="w-2/3 appearence-none focus:outline-none p-2 m-2 border-gray-1 border-1 rounded shadow"
                   value={ct.valor} onChange={e => handleValorChange(e,ct)}></input>
               </div>              
               <div class="w-full flex flex-row">
                 <div class="w-1/3 my-auto flex">
-                  <text class="font-semibold">Banco/Conta</text>
+                  <a class="font-semibold">Banco/Conta</a>
                 </div>
                 {getBancoSelect(ct)}
               </div>
@@ -366,28 +366,28 @@ export default function Home() {
           <div class="bg-gray-100 shadow rounded-lg mx-4 px-2 flex flex-col border">
             <div class="w-full flex flex-row">
               <div class="w-1/3 my-auto">
-                <text class="font-semibold">Descrição</text>
+                <a class="font-semibold">Descrição</a>
               </div>
               <input type="text" class="w-2/3 appearence-none focus:outline-none p-2 m-2 border-gray-1 border-1 rounded shadow"
                 data={cad_descricao} onChange={e => SetCad_Descricao(e.target.value)}></input>
             </div>
             <div class="w-full flex flex-row">
               <div class="w-1/3 my-auto">
-                <text class="font-semibold">Dia Venc.</text>
+                <a class="font-semibold">Dia Venc.</a>
               </div>
               <input type="number" class="w-2/3 appearence-none focus:outline-none p-2 m-2 border-gray-1 border-1 rounded shadow"
                 data={cad_dia} onChange={e => SetCad_Dia(e.target.value)}></input>
             </div>
             <div class="w-full flex flex-row">
               <div class="w-1/3 my-auto">
-                <text class="font-semibold">Parcela</text>
+                <a class="font-semibold">Parcela</a>
               </div>
               <input type="text" class="w-2/3 appearence-none focus:outline-none p-2 m-2 border-gray-1 border-1 rounded shadow"
                 data={cad_parcela} onChange={e => SetCad_Parcela(e.target.value)}></input>
             </div>
             <div class="w-full flex flex-row">
               <div class="w-1/3 my-auto">
-                <text class="font-semibold">Valor</text>
+                <a class="font-semibold">Valor</a>
               </div>
               <input type="number" class="w-2/3 appearence-none focus:outline-none p-2 m-2 border-gray-1 border-1 rounded shadow"
                 data={cad_valor} onChange={e => SetCad_Valor(e.target.value)}></input>

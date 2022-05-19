@@ -1,5 +1,6 @@
 import { signIn, signOut, useSession } from 'next-auth/client'
 import styles from './header.module.css'
+import ScriptAdSense from '../components/script-adsense.js'
 
 // The approach used in this component shows how to build a sign in and sign out
 // component that works on pages which support both client and server side
@@ -8,12 +9,11 @@ export default function Header () {
   const [ session, loading ] = useSession()
 
   return (
-    <header>
+    <header>      
       <noscript>
         <style>{`.nojs-show { opacity: 1; top: 0; }`}</style>
-      </noscript>
-      <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9890924604571133"
-        crossorigin="anonymous"></script>      
+      </noscript>  
+      <ScriptAdSense />
       <div class="flex flex-col mx-auto px-4 md:w-1/2">
         <p className={`nojs-show ${(!session && loading) ? styles.loading : styles.loaded}`}>
           {!session && <>
