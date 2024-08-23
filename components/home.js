@@ -1,6 +1,6 @@
 import {useEffect,useState} from 'react';
 import axios from 'axios';
-import {FaCheckCircle, FaPlusCircle} from 'react-icons/fa';
+import {FaCheckCircle, FaPlusCircle,FaCalendarDay} from 'react-icons/fa';
 import {getNextMonth,getMonthName} from '../global.js';
 import { useSession } from 'next-auth/client';
 
@@ -288,17 +288,29 @@ export default function Home() {
                   value={ct.descricao} onChange={e => HandleDescricaoChange(e,ct)}></input>                  
               </div>
               <div class="w-full flex flex-row">
-                <div class="w-1/3 my-auto">
+                <div class="w-1/3 my-auto flex">
                   <a class="font-semibold">Data Pag.</a>
                 </div>
-                <input type="date" class="w-2/3 appearence-none focus:outline-none p-2 m-2 border-gray-1 border-1 rounded shadow"
-                  value={ct.data_pagamento} onChange={e => handleDataPChange(e,ct)}></input>
+                <div class="w-2/3 flex flex-row mx-2">
+                  <input type="date" class="w-full appearence-none focus:outline-none p-2 mr-2 border-gray-1 border-1 rounded shadow"
+                    value={ct.data_pagamento} onChange={e => handleDataPChange(e,ct)}></input>
+                  <a class="my-auto appearence-none focus:outline-none cursor-pointer" title="Hoje"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    
+                    let dt = new Date();
+                    ct.data_pagamento = dt.toISOString().slice(0, 10);
+                    loadList();
+                  }}>
+                  <FaCalendarDay size={26} class="text-green-700 hover:text-green-900" />
+                  </a>      
+                </div>          
               </div>
               <div class="w-full flex flex-row">
                 <div class="w-1/3 my-auto">
                   <a class="font-semibold">Valor</a>
                 </div>
-                <input type="number" class="w-2/3 appearence-none focus:outline-none p-2 m-2 border-gray-1 border-1 rounded shadow"
+                <input type="number" class="w-2/3 appearence-none focus:outline-none p-2 mx-2 mt-2 border-gray-1 border-1 rounded shadow"
                   value={ct.valor} onChange={e => handleValorChange(e,ct)}></input>
               </div>              
               <div class="w-full flex flex-row">
@@ -309,10 +321,10 @@ export default function Home() {
               </div>
               <div class="flex flex-row-reverse">
                 <div class="w-full flex flex-row-reverse">
-                  <button class="appearence-none focus:outline-none my-2 mr-2 bg-blue-500 hover:bg-blue-700 p-2 rounded-lg font-semibold text-white"
+                  <button class="appearence-none focus:outline-none mb-1 mr-2 bg-blue-500 hover:bg-blue-700 p-2 rounded-lg font-semibold text-white"
                     onClick={() => handleEdit(ct)}>Confirmar</button>
                 </div>
-                <button class="appearence-none focus:outline-none my-2 mr-2 bg-white border border-red-500 hover:bg-red-100 p-2 rounded-lg font-semibold"
+                <button class="appearence-none focus:outline-none mb-1 mr-2 bg-white border border-red-500 hover:bg-red-100 p-2 rounded-lg font-semibold"
                     onClick={() => handleDelete(ct)}>Excluir</button>
               </div>
             </div>            
