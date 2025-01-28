@@ -2,7 +2,7 @@ import Header from '../components/header'
 
 export default function Layout ({children}) {
   return (    
-    <main class="h-screen">
+    <main class="h-screen bg-gray-100">
       <div class="h-10" >
         <Header />
       </div>

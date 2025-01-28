@@ -7,6 +7,7 @@ import { useSession } from 'next-auth/client';
 const apiLocal = axios.create();
 
 export default function Home() {
+  const [contas_full,SetContas_Full] = useState([]);
   const [session,ldng ] = useSession();
   const [_data,Set_Data] = useState(new Date());
   const [mes,SetMes] = useState();
@@ -14,6 +15,7 @@ export default function Home() {
   const [contas,SetContas] = useState();
   const [bancos,SetBancos] = useState();
   const [list,SetList] = useState();
+  const [filtro,SetFiltro] = useState('');
 
   const [cad_descricao,SetCad_Descricao] = useState('');
   const [cad_dia,SetCad_Dia] = useState(10);
@@ -24,6 +26,10 @@ export default function Home() {
   const [emAberto,SetEmAberto] = useState(0);
 
   const [loading,SetLoading] = useState(true);
+
+  useEffect(() => {
+    applyFilter()
+  },[filtro])
 
   useEffect(() => {
     updateContas();
@@ -102,6 +108,7 @@ export default function Home() {
       new_contas = response.data;
       if ( old_contas !== new_contas ) {
         SetContas(new_contas);
+        SetContas_Full(new_contas);
       }
     });     
   }
@@ -248,11 +255,11 @@ export default function Home() {
     if ( bancos ) {
       return  <div class="w-2/3 flex flex-row mx-2">
               <select class="w-full appearence-none focus:outline-none py-2 my-2 mr-2 border-gray-1 border-1 rounded shadow"
+                value={ct.conta_pagamento?.nome}
                 onChange={e => handleBancoChange(e,ct)}>
                 {bancos.map(bc => (
                   <option key={bc.id}>{bc.nome}</option>
                 ))}               
-                
               </select>
               
               <a class="my-auto appearence-none focus:outline-none cursor-pointer" title="Cadastro de Contas/Bancos para Recebimento"
@@ -350,17 +357,33 @@ export default function Home() {
     });
   }
 
+  async function applyFilter() {
+    // aplica filtro
+    let _contas = contas_full
+    if (filtro.trim() != '') {
+      _contas = _contas.filter(x => x.descricao.toLowerCase().includes(filtro.toLowerCase()));
+    }
+    SetContas(_contas);    
+  }
+
   return (    
     <div class="flex flex-col h-full">
-      <div class="w-full flex flex-row">
-        <button class="bg-gray-600 my-2 px-4 font-semibold text-white shadow-lg appearence-none focus:outline-none hover:bg-gray-800 rounded-xl"
+      <div class="w-full flex flex-row mt-1 mb-2">
+        <button class="bg-gray-600 px-4 font-semibold text-white shadow-lg appearence-none focus:outline-none hover:bg-gray-800 rounded-xl"
             onClick={PreviousMonth}>Anterior</button>
         <div class="mx-auto">
-          <h1 class="mx-auto font-bold text-xl my-4">{mes} de {ano}</h1>
+          <h1 class="mx-auto font-bold text-xl mb-2">{mes} de {ano}</h1>
         </div>
-        <button class="bg-gray-600 my-2 px-4 font-semibold text-white shadow-lg appearence-none focus:outline-none hover:bg-gray-800 rounded-xl" 
+        <button class="bg-gray-600 px-4 font-semibold text-white shadow-lg appearence-none focus:outline-none hover:bg-gray-800 rounded-xl" 
             onClick={NextMonth}>Próximo</button>
-      </div>        
+      </div> 
+      <div class="w-full flex flex-row">
+        <div class="w-1/6 my-auto">
+          <a class="font-semibold">Filtro</a>
+        </div>
+        <input type="text" class="w-5/6 appearence-none focus:outline-none p-1 mb-1 border-gray-1 border-1 rounded shadow"
+          data={filtro} onChange={e => SetFiltro(e.target.value)}></input>
+      </div>   
       <div class="flex flex-col flex-grow overflow-auto">
         <div class="mx-auto w-full py-2 bg-gray-300 rounded-xl mb-2 flex flex-row font-semibold">
           <div class="mx-2 my-auto w-4/12">Descrição</div>
@@ -447,7 +470,7 @@ export default function Home() {
           </div>          
         </div>
         <div class="w-full">
-          <button class="flex mx-auto border border-gray-700 p-2 rounded-lg my-6" onClick={importarContas}>Importar Contas do mês passado</button>
+          <button class="flex mx-auto border border-gray-700 p-2 rounded-lg my-4" onClick={importarContas}>Importar Contas do mês passado</button>
         </div>        
       </div>
     </div>   
