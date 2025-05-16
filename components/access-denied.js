@@ -4,7 +4,7 @@ export default function AccessDenied () {
   return (
     <div class="flex">
       <div class="flex flex-col w-full text-center">
-        <h1 class="text-bold text-8xl font-mono">Finances</h1>
+        <h1 class="text-bold text-7xl font-mono pt-10">Finances</h1>
         <p>
           Controle suas finanças de forma simples e eficiente, sem complicações.
         </p>

@@ -14,7 +14,7 @@ export default function Header () {
         <style>{`.nojs-show { opacity: 1; top: 0; }`}</style>
       </noscript>  
       <ScriptAdSense />
-      <div class="flex flex-col mx-auto px-4 md:w-1/2">
+      <div class="flex flex-col mx-auto md:px-4 md:w-1/2">
         <p className={`nojs-show ${(!session && loading) ? styles.loading : styles.loaded}`}>
           {!session && <>
             <span className={styles.notSignedInText}>Faça login para prosseguir</span>

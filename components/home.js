@@ -142,8 +142,8 @@ export default function Home() {
             let parcela_atual = parseInt(parc.substr(0,parc.indexOf('/')));
             let parcela_final = parseInt(parc.substr(parc.indexOf('/')+1,parc.length));
             let dat2 = String(_data.getMonth()+1) + _data.getFullYear(); 
-            element.data_pagamento = '';           
-            if ( parc === 'x' ) {
+            element.data_pagamento = '';          
+            if ( parc.trim().toLowerCase() === 'x' ) {
               apiLocal.post(`/api/bills?month=${dat2}`,element).then(response => {});
             } 
             else {
@@ -445,7 +445,7 @@ export default function Home() {
         
       </div>
       <div class="w-full py-2 text-lg font-semibold border-t border-gray-700 flex flex-col">        
-        <div class="flex flex-row">
+        <div class="flex flex-row ">
           <div class="flex w-12">
             <label>Aberto:</label>
             <label class="px-1">{emAberto}</label>                      
@@ -460,18 +460,20 @@ export default function Home() {
           </div>
         </div>
         <div>
-          <div class="flex flex-row-reverse flex-grow py-1">
-            <div class="flex flex-row">
-              <label class="px-2">Saldo atual</label>
-              <label class={getItemClass("font-bold rounded px-2 text-white w-32 flex flex-row-reverse",saldoMes)}>
-                {Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(saldoMes)}
-              </label>
+          <div class="flex flex-grow py-1">
+            <div class="flex w-54">
+              <button class="flex border border-gray-700 rounded-lg px-2" onClick={importarContas}>Importar mês passado</button>
+            </div>        
+            <div class="flex flex-row-reverse flex-grow py-1">
+              <div class="flex flex-row">
+                <label class="px-2">Saldo atual</label>
+                <label class={getItemClass("font-bold rounded px-2 text-white w-32 flex flex-row-reverse",saldoMes)}>
+                  {Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(saldoMes)}
+                </label>
+              </div>
             </div>
           </div>          
         </div>
-        <div class="w-full">
-          <button class="flex mx-auto border border-gray-700 p-2 rounded-lg my-4" onClick={importarContas}>Importar Contas do mês passado</button>
-        </div>        
       </div>
     </div>   
   )
